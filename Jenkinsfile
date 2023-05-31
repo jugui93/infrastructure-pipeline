@@ -1,5 +1,6 @@
 pipeline {
   agent any
+  tool name: 'terraform', type: 'terraform'
   stages {
     stage('Checkout') {
       steps {
@@ -9,20 +10,25 @@ pipeline {
 
     stage('Terraform Init') {
       steps {
-        sh '''terraform init
-'''
+        withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+          sh 'terraform init'
+        }
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        sh 'terraform plan'
+        withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+          sh 'terraform plan'
+        }
       }
     }
 
     stage('Terraform Apply') {
       steps {
-        sh 'terraform apply --auto-approve'
+        withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+          sh 'terraform apply --auto-approve'
+        }
       }
     }
 
