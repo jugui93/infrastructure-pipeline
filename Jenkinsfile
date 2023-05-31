@@ -18,7 +18,7 @@ pipeline {
 
     stage('Terraform Plan') {
       steps {
-        withCredentials([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+        withCredentials(<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>) {
           sh 'terraform plan'
         }
       }
