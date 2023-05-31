@@ -3,6 +3,9 @@ pipeline {
   tools {
     terraform 'terraform'
   }
+  parameters {
+    choice choices: ['apply', 'destroy'], description: 'Action to be taken on the Terraform configuration', name: 'action'
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -26,10 +29,10 @@ pipeline {
       }
     }
 
-    stage('Terraform Apply') {
+    stage('Terraform action') {
       steps {
         withAWS(credentials: '70ba9347-f845-4a24-84ae-e9abb7b28bff') {
-          sh 'terraform apply --auto-approve'
+          sh 'terraform ${action} --auto-approve'
         }
       }
     }
