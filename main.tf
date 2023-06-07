@@ -68,6 +68,50 @@ resource "aws_security_group" "instance" {
   }
 }
 
+resource "aws_lb" "lb" {
+  name = "app-lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.instance.id]
+  subnets = [aws_subnet.public.id]
+
+  enable_deletion_protection = true 
+
+  access_logs {
+    bucket = aws_s3_bucket.lb_logs.id
+    prefix = "lb"
+    enabled= true
+  }
+
+  tags = {
+    Name = "load-balancer"
+  }
+}
+
+resource "aws_lb_target_group" "group" {
+  name = "group-lb-tg"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_lb_listener" "lb" {
+  load_balancer_arn= aws_lb.lb.arn
+  port = 80
+  protocol = "HTTP"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb.lb.arn
+  }
+}
+
+resource "aws_lb_target_group_attachment" "group" {
+  target_group_arn = aws_lb_target_group.group.arn
+  target_id = aws_instance.http_server.id
+  port = 80
+}
+
 resource "aws_instance" "http_server" {
   ami                    = var.instance_AMI
   instance_type          = var.instance_type
