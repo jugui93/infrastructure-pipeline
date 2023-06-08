@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    label 'ubuntu'
+  }
   tools {
     terraform 'terraform'
   }
@@ -9,7 +11,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git(url: 'git@github.com:jugui93/infrastructure-pipeline.git', branch: 'main', credentialsId: 'c3901aa1-c7bc-42f7-819e-3cc7219596d7')
+        git(url: 'git@github.com:jugui93/infrastructure-pipeline.git', branch: 'feature/load-balancer', credentialsId: 'c3901aa1-c7bc-42f7-819e-3cc7219596d7')
       }
     }
 
