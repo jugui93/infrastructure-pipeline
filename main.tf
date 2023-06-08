@@ -119,63 +119,31 @@ resource "aws_lb_listener" "lb" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "server1" {
-  target_group_arn = aws_lb_target_group.group.arn
-  target_id = aws_instance.http_server1.id
-  port = 80
+resource "aws_autoscaling_attachment" "as_config" {
+  autoscaling_group_name = aws_autoscaling_group.as_config.name
+  lb_target_group_arn = aws_lb_target_group.group.arn
 }
 
-resource "aws_lb_target_group_attachment" "server2" {
-  target_group_arn = aws_lb_target_group.group.arn
-  target_id = aws_instance.http_server2.id
-  port = 80
-}
+resource "aws_launch_configuration" "as_config" {
+  name_prefix = "lc-http-"
+  image_id = var.instance_AMI
+  instance_type = var.instance_type
+  security_groups = [aws_security_group.instance.id]
 
-/* resource "aws_s3_bucket" "lb_logs" {
-  bucket = "39b0a696-a61f-465d-aca4-c995bafb7c14-load-balancer-bucket"
-  
-  tags = {
-    Name = "lb-bucket"
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-resource "aws_s3_bucket_policy" "s3_lb_policy" {
-  bucket = aws_s3_bucket.lb_logs.id
-  policy = data.aws_iam_policy_document.s3_lb_policy.json
+resource "aws_autoscaling_group" "as_config" {
+  min_size = 1
+  max_size = 4
+  desired_capacity = 2
+  launch_configuration = aws_launch_configuration.as_config.name
+  vpc_zone_identifier = [aws_subnet.public_subnetA.id, aws_subnet.public_subnetB.id]
 }
 
-resource "aws_s3_bucket_acl" "lb_logs" {
-  depends_on = [aws_s3_bucket_ownership_controls.lb_logs]
-
-  bucket = aws_s3_bucket.lb_logs.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_ownership_controls" "lb_logs" {
-  bucket = aws_s3_bucket.lb_logs.id
-
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-data "aws_iam_policy_document" "s3_lb_policy" {
-  statement {
-    principals {
-      identifiers = ["arn:aws:iam::054676820928:root"]
-      type = "AWS"
-    }
-
-    actions = ["s3:PutObject"]
-
-    resources = [ 
-      aws_s3_bucket.lb_logs.arn,
-      "${aws_s3_bucket.lb_logs.arn}/*"
-    ]
-  }
-} */
-
-resource "aws_instance" "http_server1" {
+/* resource "aws_instance" "http_server1" {
   ami                    = var.instance_AMI
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_subnetA.id
@@ -207,4 +175,4 @@ resource "aws_instance" "http_server2" {
   tags = {
     Name = "http_server2"
   }
-}
+} */

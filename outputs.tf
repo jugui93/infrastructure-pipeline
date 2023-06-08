@@ -1,4 +1,4 @@
-output "ec2_public_ip" {
+/* output "ec2_public_ip" {
   description = "public IP address for EC2 instance"
   value       = aws_instance.http_server1.public_ip
 }
@@ -10,7 +10,7 @@ output "ec2_ami" {
 output "ec2_type" {
   description = "type of the EC2 instance"
   value       = aws_instance.http_server1.instance_type
-}
+} */
 
 output "public_vpc_id" {
   description = "ID of the VPC's public"
