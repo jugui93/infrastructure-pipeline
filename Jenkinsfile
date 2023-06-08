@@ -11,7 +11,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git(url: 'git@github.com:jugui93/infrastructure-pipeline.git', branch: 'develop', credentialsId: 'c3901aa1-c7bc-42f7-819e-3cc7219596d7')
+        git(url: 'git@github.com:jugui93/infrastructure-pipeline.git', branch: 'feature/auto-scaling', credentialsId: 'c3901aa1-c7bc-42f7-819e-3cc7219596d7')
       }
     }
 
