@@ -143,36 +143,52 @@ resource "aws_autoscaling_group" "as_config" {
   vpc_zone_identifier = [aws_subnet.public_subnetA.id, aws_subnet.public_subnetB.id]
 }
 
-/* resource "aws_instance" "http_server1" {
-  ami                    = var.instance_AMI
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public_subnetA.id
-  vpc_security_group_ids = [aws_security_group.instance.id]
-  user_data              = <<-EOF
-                  #!/bin/bash
-                  sudo apt-get update
-                  sudo apt-get install -y apache2
-                  sudo systemctl start apache2
-                  EOF
+resource "aws_autoscaling_policy" "scale_down" {
+  name                   = "app_scale_down"
+  autoscaling_group_name = aws_autoscaling_group.as_config.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = -1
+  cooldown               = 120
+}
 
-  tags = {
-    Name = "http_server1"
+resource "aws_autoscaling_policy" "scale_up" {
+  name                   = "app_scale_up"
+  autoscaling_group_name = aws_autoscaling_group.as_config.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = 1
+  cooldown               = 120
+}
+
+resource "aws_cloudwatch_metric_alarm" "scale_down" {
+  alarm_description   = "Monitors CPU utilization for as_config ASG"
+  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  alarm_name          = "app_scale_down"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  namespace           = "AWS/EC2"
+  metric_name         = "CPUUtilization"
+  threshold           = "10"
+  evaluation_periods  = "2"
+  period              = "120"
+  statistic           = "Average"
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.as_config.name
   }
 }
 
-resource "aws_instance" "http_server2" {
-  ami                    = var.instance_AMI
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public_subnetB.id
-  vpc_security_group_ids = [aws_security_group.instance.id]
-  user_data              = <<-EOF
-                  #!/bin/bash
-                  sudo apt-get update
-                  sudo apt-get install -y apache2
-                  sudo systemctl start apache2
-                  EOF
+resource "aws_cloudwatch_metric_alarm" "scale_up" {
+  alarm_description   = "Monitors CPU utilization for as_config ASG"
+  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  alarm_name          = "app_scale_up"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  namespace           = "AWS/EC2"
+  metric_name         = "CPUUtilization"
+  threshold           = "20"
+  evaluation_periods  = "2"
+  period              = "120"
+  statistic           = "Average"
 
-  tags = {
-    Name = "http_server2"
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.as_config.name
   }
-} */
+}
